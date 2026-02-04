@@ -1,36 +1,129 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Stock Tracker 📈
 
-## Getting Started
+Real-time AI stock portfolio tracker with foundation model forecasting. Uses Google TimesFM and Amazon Chronos for multi-horizon price predictions.
 
-First, run the development server:
+![Dashboard Preview](https://img.shields.io/badge/Next.js-16.1-black?logo=next.js) ![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python) ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green?logo=fastapi)
 
+## Features
+
+- 📊 **Real-time Stock Data** - Live prices from Yahoo Finance
+- 🤖 **AI Forecasting** - Google TimesFM & Amazon Chronos models
+- 📈 **Multi-Horizon Predictions** - 1D, 1W, 1M, 6M, 1Y forecasts
+- 🎯 **AI Tech Stack Focus** - Tracks companies across Hardware, Cloud, Data, Models, Applications
+- ⚡ **Optimized Performance** - Sequential model loading, GPU acceleration (CUDA/MPS)
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 20+
+- Python 3.11+
+- [uv](https://docs.astral.sh/uv/) (recommended) or pip
+
+### Option 1: Local Development
+
+**1. Frontend Setup**
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**2. Backend Setup** (new terminal)
+```bash
+cd backend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Using uv (recommended)
+uv sync
+uv run python main.py
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Or using pip
+pip install -r requirements.txt
+python main.py
+```
 
-## Learn More
+**3. Open** http://localhost:3000
 
-To learn more about Next.js, take a look at the following resources:
+### Option 2: Docker
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Development (hot-reload)
+docker-compose up
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Production build
+docker build -t ai-stock-tracker .
+docker run -p 3000:3000 -p 8000:8000 ai-stock-tracker
+```
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+ai-stock-tracker/
+├── src/                    # Next.js frontend
+│   ├── app/               # App router pages
+│   ├── components/        # React components
+│   └── store/             # Zustand state management
+├── backend/               # Python FastAPI backend
+│   ├── main.py           # API endpoints
+│   ├── forecasting.py    # ML inference engine
+│   ├── service.py        # Stock data service
+│   └── models.py         # SQLAlchemy models
+├── docker-compose.yml     # Docker development setup
+└── Dockerfile            # Production container
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/stocks` | GET | Get all tracked stocks |
+| `/api/stocks` | POST | Add new stock to watchlist |
+| `/api/refresh` | POST | Refresh stock data (add `?run_inference=true` for ML) |
+| `/api/needs-refresh` | GET | Check if data is stale (>24h) |
+| `/api/forecasts/{ticker}` | GET | Get forecast data for specific stock |
+
+## GPU Acceleration
+
+The backend auto-detects the best available device:
+
+1. **CUDA** - NVIDIA GPUs (Linux/Windows)
+2. **MPS** - Apple Silicon (macOS)
+3. **CPU** - Fallback for all systems
+
+To force a specific device, set `TORCH_DEVICE` environment variable:
+```bash
+TORCH_DEVICE=cpu python main.py
+```
+
+## Memory Optimization
+
+Models load sequentially to minimize RAM usage:
+- Peak usage: ~5-6GB (vs ~11GB if loaded simultaneously)
+- Each model is unloaded after inference with explicit garbage collection
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | 8000 | Backend API port |
+| `TORCH_DEVICE` | auto | Force device: `cuda`, `mps`, or `cpu` |
+| `HF_HOME` | `./hf_cache` | Hugging Face cache directory |
+
+## Tech Stack
+
+**Frontend:**
+- Next.js 16.1 (App Router)
+- React 19
+- Tailwind CSS 4
+- Recharts, Framer Motion
+- Zustand
+
+**Backend:**
+- FastAPI
+- SQLAlchemy (SQLite)
+- PyTorch
+- Google TimesFM 2.5
+- Amazon Chronos T5
+
+## License
+
+MIT

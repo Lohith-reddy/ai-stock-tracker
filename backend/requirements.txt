@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+yfinance
+sqlalchemy
+pydantic
+torch
+numpy
+pandas
+scikit-learn
+transformers
+accelerate
+git+https://github.com/google-research/timesfm.git
+git+https://github.com/amazon-science/chronos-forecasting.git
